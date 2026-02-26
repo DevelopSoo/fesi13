@@ -1,41 +1,81 @@
-// src/app/page.tsx
-
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
 
-export default function AnimateCompare() {
-  const [animated, setAnimated] = useState(false);
-  const [isAnimating, setIsAnimating] = useState(false);
+import { useSessionStorage } from "@/hooks/useSessionStorage";
+
+type Item = {
+  id: number;
+  name: string;
+};
+
+export type CartItem = Item & {
+  count: number;
+};
+
+const ITEMS = [
+  {
+    id: 1,
+    name: "사과",
+  },
+  {
+    id: 2,
+    name: "오렌지",
+  },
+  {
+    id: 3,
+    name: "딸기",
+  },
+];
+
+export default function Home() {
+  // key ("cartItems")는 상수로 관리하는 것이 실수 방지에 도움이 됩니다.
+  const [cartItems, setCartItems] = useSessionStorage<CartItem[]>(
+    "cartItems",
+    [],
+  );
+
+  const handleAddItem = (item: Item) => {
+    const isExist = cartItems.find((cartItem) => cartItem.id === item.id);
+    if (isExist) {
+      setCartItems(
+        cartItems.map((cartItem) =>
+          cartItem.id === item.id
+            ? { ...cartItem, count: cartItem.count + 1 }
+            : cartItem,
+        ),
+      );
+    } else {
+      setCartItems([...cartItems, { ...item, count: 1 }]);
+    }
+  };
 
   return (
-    <div className="container">
-      {/* ❌ will-change 없음 — CPU 레이어로 처리 */}
-      {/* Layers 패널에서 별도 레이어로 보이지 않음 */}
-      <div>
-        <p>will-change ❌</p>
-        <div className={`box box-no-wc ${animated ? "animate" : ""}`} />
+    <div className="mx-auto flex h-screen max-w-md flex-col items-center justify-center gap-4">
+      <h1 className="text-2xl font-bold">코드잇 마켓</h1>
+      <div className="flex w-full flex-col items-center justify-center gap-4">
+        {ITEMS.map((item) => (
+          <div
+            key={item.id}
+            className="flex w-full items-center justify-between gap-2 rounded-md bg-gray-100 px-8 py-4"
+          >
+            <span>{item.name}</span>
+            <button
+              onClick={() => handleAddItem(item)}
+              className="cursor-pointer rounded-md bg-gray-300 px-4 py-3 hover:bg-gray-400"
+            >
+              담기
+            </button>
+          </div>
+        ))}
       </div>
-
-      {/* ✅ will-change 있음 — GPU 레이어로 승격 */}
-      {/* Layers 패널에서 별도 Compositing Layer로 표시됨 */}
-      <div>
-        <p>will-change ✅</p>
-        <div
-          className={`box box-wc ${animated ? "animate" : ""}`}
-          style={{ willChange: isAnimating ? "transform" : "auto" }}
-          onTransitionEnd={() => setIsAnimating(false)} // 3. 애니메이션 완료 → will-change 해제
-        />
-      </div>
-
-      {/* onMouseEnter: 클릭 전 미리 GPU 레이어 준비 */}
-      <button
-        onMouseLeave={() => setIsAnimating(false)}
-        onMouseEnter={() => setIsAnimating(true)} // 1. hover 시 will-change 사전 적용
-        onClick={() => setAnimated((prev) => !prev)} // 2. 클릭 시 애니메이션 시작
+      <div className="w-full">장바구니: {cartItems.length}개</div>
+      <Link
+        href="/cart"
+        className="w-full rounded-md bg-indigo-500 px-4 py-3 text-white"
       >
-        {animated ? "되돌리기" : "애니메이션 실행"}
-      </button>
+        장바구니로 가기
+      </Link>
     </div>
   );
 }
