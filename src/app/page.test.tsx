@@ -1,23 +1,36 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import Home from "./page";
+import { server } from "@/mocks/server";
+import { http, HttpResponse } from "msw";
 
-describe("Home 페이지 렌더링", () => {
-  test("첫 렌더링 시 초기값이 0인지 확인", () => {
+describe("MSW 모킹 테스트", () => {
+  test("상세 데이터 모킹", async () => {
     render(<Home />);
-    expect(screen.getByText("Count: 0")).toBeInTheDocument();
+
+    const postItem = await screen.findByText("1: 첫 번째 게시글");
+    expect(postItem).toBeInTheDocument();
   });
 
-  test("증가 버튼 클릭 시 카운트가 증가해야 한다.", () => {
+  test("서버 에러 시 모킹 테스트", async () => {
+    // 에러를 모킹
+    server.use(
+      http.get("http://localhost:4000/posts/1", () => {
+        return HttpResponse.json(null, { status: 500 });
+      }),
+    );
+
     render(<Home />);
-    const incrementButton = screen.getByText("증가");
-    fireEvent.click(incrementButton);
-    expect(screen.getByText("Count: 1")).toBeInTheDocument();
+
+    const error = await screen.findByText("데이터를 불러오는데 실패했습니다.");
+
+    expect(error).toBeInTheDocument();
   });
 
-  test("감소 버튼 클릭 시 카운트가 감소해야 한다.", () => {
-    render(<Home />);
-    const decrementButton = screen.getByText("감소");
-    fireEvent.click(decrementButton);
-    expect(screen.getByText("Count: -1")).toBeInTheDocument();
+  test("네트워크 에러 시", () => {
+    server.use(
+      http.get("http://localhost:4000/posts/1", () => {
+        return HttpResponse.error();
+      }),
+    );
   });
 });
