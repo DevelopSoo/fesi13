@@ -3,5 +3,5 @@
 "use client";
 
 export default function Home() {
-  return <></>;
+  return <>테스트</>;
 }
