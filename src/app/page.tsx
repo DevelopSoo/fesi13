@@ -2,9 +2,6 @@
 
 "use client";
 
-export const a = 1;
-
 export default function Home() {
-  console.log(a);
-  return <>테스트2</>;
+  return <h1>테스트</h1>;
 }
