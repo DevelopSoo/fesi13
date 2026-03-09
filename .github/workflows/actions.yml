@@ -1,7 +1,10 @@
 # 이름 짓기
 name: Github Actions 연습하기
 # 언제 실행할꺼야?
-on: push
+on:
+  push:
+    branches:
+      - feature/*
 
 # 뭘 실행할꺼야? -> 직업 부여
 jobs:
