@@ -1,27 +1,27 @@
 # 이름 짓기
 name: Github Actions 연습하기
 # 언제 실행할꺼야?
-on: push
+on:
+  push:
+    branches:
+      - feature/*
 
 # 뭘 실행할꺼야? -> 직업 부여
 jobs:
-  push-job:
-    # 컴퓨터 어떤 환경에서 실행할꺼야?
+  test:
     runs-on: ubuntu-latest
-    # 일의 순서
     steps:
-      - name: 첫 번째 작업
-        run: echo "첫 번째 작업 실행 중"
+      - name: Github Repository 불러오기
+        uses: actions/checkout@v5
 
-      - name: 여러 문장 작성하기
-        run: |
-          echo "첫 번째 명령어"
-          echo "두 번째 명령어"
+      - name: Node.js 설치
+        uses: actions/setup-node@v6
+        # 옵션: 노드 24 버전을 설치해
+        with:
+          node-version: "24"
 
-      - name: Github Actions 자체 변수 사용해보기
-        run: |
-          echo $GITHUB_SHA
-          echo $GITHUB_REPOSITORY
+      - name: 의존성 설치
+        run: npm ci
 
-      - name: Github Actions에 몰래 저장한 변수 사용해보기
-        run: echo ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+      - name: 테스트 실행
+        run: npm run test
