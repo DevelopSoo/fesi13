@@ -2,7 +2,9 @@
 
 "use client";
 
-const a = 1;
+export const a = 1;
+
 export default function Home() {
+  console.log(a);
   return <>테스트2</>;
 }
